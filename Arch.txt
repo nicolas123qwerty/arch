@@ -1,0 +1,136 @@
+Fixes:
+
+Reinstalar o arch para ver sobre dependencias ruins
+
+achar um outro screenshooter e editor de video
+
+ter o melhor dwm
+
+colocar swap
+
+encriptar as coisas
+
+ver sobre outros sistemas de arquivos (btrfs, xfs e etc...)
+
+mirrors (reflector)
+
+estudar sobre seguranca, ssh, firewall e etc...
+
+----------------------------------------------------------------------
+
+ping -c 3 google.com
+
+cat /sys/firmware/efi/fw_platform_size - Verificar se o output deu 64
+
+-----------------------------------
+cfdisk
+
+512M para /boot - /dev/sda1
+
+200G para / - /dev/sda2
+
+731G para /home - /dev/sda3
+-----------------------------------
+
+mkfs.fat -F32 /dev/sda1
+mkfs.ext4 /dev/sda2
+mkfs.ext4 /dev/sda3
+
+mount /dev/sda2 /mnt
+
+mkdir /mnt/boot
+mkdir /mnt/home
+
+mount /dev/sda1 /mnt/boot
+mount /dev/sda3 /mnt/home
+
+lsblk
+
+pacstrap /mnt base base-devel linux linux-firmware linux-headers vim lvm2 dracut sbsigntools binutils dhcpcd
+
+genfstab -U -p /mnt >> /mnt/etc/fstab
+cat /mnt/etc/fstab
+
+arch-chroot /mnt
+
+passwd
+
+useradd -m -g users -G wheel,storage,power,audio,video -s /bin/bash unknown - limpar esse codigo
+passwd unknown
+
+vim /etc/sudoers - descomentar o %wheel ALL=(ALL) ALL
+
+ln -sf /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime
+date
+
+vim /etc/locale.gen - descomentar pt-br
+locale-gen
+
+echo "LANG=pt_BR.UTF-8" >> /etc/locale.conf
+
+
+echo "Arch" >> /etc/hostname
+
+sudo vim /etc/hosts
+127.0.0.1	localhost
+::1		localhost
+127.0.1.1    arch.localdomain  arch
+
+bootctl --path=/boot install
+cd /boot/loader/entries/
+sudo vim arch.conf -  title  Arch Linux
+                      linux  /vmlinuz-linux
+                      initrd /initramfs-linux.img
+                      options root=/dev/sda2 rw
+
+exit
+reboot
+
+systemctl enable systemd-networkd
+systemctl enable systemd-resolved
+systemctl start systemd-networkd
+systemctl start systemd-resolved
+
+sudo vim /etc/systemd/network/20-wired.network - [Match]
+                                                Name=enp3s0
+                                                [Network]
+                                                DCHP=yes
+
+systemctl restart systemd-networkd
+systemctl restart systemd-resolved
+ 
+ping -c 3 google.com
+
+pacman -S fastfetch xorg-server xorg-xinit libx11 libxinerama libxft webkit2gtk nvidia nvidia-settings git intel-ucode pipewire alsa-utils pipewire-pulse pipewire-jack pavucontrol mousepad mupdf ristretto easyeffects parole thunar
+thunar-archive-plugin xarchiver unzip zip unrar p7zip htop noto-fonts-emoji qbittorrent audacity go xdg-utils xdg-user-dirs gst-libav gvfs gvfs-afc gvfs-mtp android-tools thunar-volman qt5-base lsp-plugins calf zam-plugins mda.lv2
+
+ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
+git clone https://aur.archlinux.org/yay.git && cd yay
+makepkg -si
+yay --version
+yay -S libdeep_filter_ladspa-bin
+
+sudo vim .xinitrc - exec dwm
+sudo vim .bash_profile - startx
+
+git clone https://git.suckless.org/dwm
+git clone https://git.suckless.org/st
+git clone https://git.suckless.org/dmenu
+
+mkdir suckless
+mv dwm st dmenu suckless/
+
+cd suckless
+cd st
+sudo make clean install
+sudo vim config.h - aumentar o pixelsize para 20
+cd -
+cd dwm
+sudo make clean install
+which st
+sudo vim config.h - procurar por /bin/sh e trocar por /usr/local/bin/st em key definitons, trocar para Mod4Mask e trocar o monospacesize para 15
+cd -
+cd dmenu
+sudo make clean install
+
+reboot
